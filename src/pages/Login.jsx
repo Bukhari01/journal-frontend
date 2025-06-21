@@ -5,6 +5,7 @@ import api from "../services/api";
 const Login = () => {
   const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -14,14 +15,19 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
       const res = await api.post("/auth/login", form);
+      console.log("Login successful:", res.data);
       localStorage.setItem("token", res.data.token);
-      navigate("/");
+      window.location.href = "/";
     } catch (err) {
+      console.error("Login error:", err.response || err.message);
       const msg = err.response?.data?.msg || "Login failed";
       setError(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -65,9 +71,10 @@ const Login = () => {
 
             <button
               type="submit"
-              className="w-80 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition"
+              disabled={loading}
+              className="w-80 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition disabled:bg-blue-300"
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
           </div>
         </form>
